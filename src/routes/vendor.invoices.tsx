@@ -28,12 +28,13 @@ function VendorInvoices() {
   function submit() {
     if (!poId) return toast.error("Select a delivered PO");
     if (!fileName) return toast.error("Choose a file");
+    const vId = vendor.id;
     const po = db.orders.find((o) => o.id === poId)!;
     update((d) => {
       d.invoices.push({
         id: `INV-${9000 + d.invoices.length + 1}`,
         poId,
-        vendorId: vendor.id,
+        vendorId: vId,
         fileName,
         amount: po.total,
         status: "Pending Review",
