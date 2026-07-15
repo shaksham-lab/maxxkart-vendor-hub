@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import React, { useState } from "react";
 import { useStore, formatCurrency, type POItem, type PurchaseOrder } from "@/lib/store";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -85,8 +85,9 @@ function Orders() {
               const v = db.vendors.find((x) => x.id === o.vendorId);
               const isExp = expanded === o.id;
               return (
-                <>
-                  <tr key={o.id} className={`border-t border-border/60 hover:bg-accent/30 transition ${i % 2 ? "bg-accent/10" : ""}`}>
+                <React.Fragment key={o.id}>
+                  <tr className={`border-t border-border/60 hover:bg-accent/30 transition ${i % 2 ? "bg-accent/10" : ""}`}>
+
                     <td className="px-5 py-3.5 font-mono font-medium">{o.id}</td>
                     <td className="px-5 py-3.5">{v?.name}</td>
                     <td className="px-5 py-3.5">

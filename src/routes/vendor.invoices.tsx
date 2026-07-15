@@ -16,10 +16,10 @@ export const Route = createFileRoute("/vendor/invoices")({
 
 function VendorInvoices() {
   const { db, update, currentVendor } = useStore();
-  const vendor = currentVendor();
   const [open, setOpen] = useState(false);
   const [poId, setPoId] = useState("");
   const [fileName, setFileName] = useState("");
+  const vendor = currentVendor();
   if (!vendor) return null;
 
   const myInvoices = db.invoices.filter((i) => i.vendorId === vendor.id);
