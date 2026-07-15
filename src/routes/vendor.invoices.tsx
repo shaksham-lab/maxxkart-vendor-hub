@@ -25,7 +25,7 @@ function VendorInvoices() {
   const myInvoices = db.invoices.filter((i) => i.vendorId === vendor.id);
   const eligiblePOs = db.orders.filter((o) => o.vendorId === vendor.id && o.status === "Delivered" && !db.invoices.some((i) => i.poId === o.id));
 
-  function submit() {
+  const submit = () => {
     if (!poId) return toast.error("Select a delivered PO");
     if (!fileName) return toast.error("Choose a file");
     const vId = vendor.id;
@@ -45,7 +45,7 @@ function VendorInvoices() {
     });
     toast.success("Invoice uploaded — awaiting admin review");
     setOpen(false); setPoId(""); setFileName("");
-  }
+  };
 
   return (
     <div className="space-y-6">
