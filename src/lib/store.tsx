@@ -94,13 +94,28 @@ function load(): DB {
   }
 }
 
+export type LoginResult =
+  | { ok: true; user: User }
+  | { ok: false; reason: "invalid" | "pending" | "rejected"; rejectionReason?: string };
+
+export type RegisterInput = {
+  name: string;
+  contactPerson: string;
+  phone: string;
+  email: string;
+  category: string;
+  address: string;
+  gst: string;
+  password: string;
+};
+
 type Ctx = {
   db: DB;
   update: (fn: (db: DB) => DB) => void;
   currentUser: () => User | null;
   currentVendor: () => Vendor | null;
-  login: (email: string, password: string) => User | null;
-  signup: (email: string, password: string, role: Role, vendorId?: string) => User;
+  login: (email: string, password: string) => LoginResult;
+  registerVendor: (input: RegisterInput) => { vendor: Vendor; user: User };
   logout: () => void;
   reset: () => void;
 };
@@ -133,13 +148,31 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     },
     login: (email, password) => {
       const u = db.users.find((x) => x.email.toLowerCase() === email.toLowerCase() && x.password === password);
-      if (u) update((d) => ({ ...d, session: { userId: u.id } }));
-      return u ?? null;
+      if (!u) return { ok: false, reason: "invalid" };
+      if (u.role === "vendor" && u.vendorId) {
+        const v = db.vendors.find((x) => x.id === u.vendorId);
+        if (v?.status === "Pending") return { ok: false, reason: "pending" };
+        if (v?.status === "Rejected") return { ok: false, reason: "rejected", rejectionReason: v.rejectionReason };
+      }
+      update((d) => ({ ...d, session: { userId: u.id } }));
+      return { ok: true, user: u };
     },
-    signup: (email, password, role, vendorId) => {
-      const u: User = { id: `u${Date.now()}`, email, password, role, vendorId };
-      update((d) => ({ ...d, users: [...d.users, u], session: { userId: u.id } }));
-      return u;
+    registerVendor: (input) => {
+      const id = `v${Date.now()}`;
+      const vendor: Vendor = {
+        id,
+        name: input.name,
+        contactPerson: input.contactPerson,
+        phone: input.phone,
+        email: input.email,
+        category: input.category,
+        address: input.address,
+        gst: input.gst,
+        status: "Pending",
+      };
+      const user: User = { id: `u${Date.now()}`, email: input.email, password: input.password, role: "vendor", vendorId: id };
+      update((d) => ({ ...d, vendors: [...d.vendors, vendor], users: [...d.users, user] }));
+      return { vendor, user };
     },
     logout: () => update((d) => ({ ...d, session: { userId: null } })),
     reset: () => setDb(seed()),
