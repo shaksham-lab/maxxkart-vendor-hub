@@ -8,6 +8,7 @@ export type User = {
   role: Role;
   vendorId?: string;
 };
+export type VendorStatus = "Pending" | "Active" | "Rejected";
 export type Vendor = {
   id: string;
   name: string;
@@ -17,7 +18,8 @@ export type Vendor = {
   category: string;
   address: string;
   gst: string;
-  active: boolean;
+  status: VendorStatus;
+  rejectionReason?: string;
 };
 export type POItem = { name: string; qty: number; price: number };
 export type POStatus = "Pending" | "Delivered" | "Completed";
@@ -52,15 +54,15 @@ export type DB = {
 
 export const CATEGORIES = ["Groceries", "Dairy", "Bakery", "Household", "Electronics"];
 
-const KEY = "maxxkart_db_v2";
+const KEY = "maxxkart_db_v3";
 
 function seed(): DB {
   const vendors: Vendor[] = [
-    { id: "v1", name: "FreshFarms Co.", contactPerson: "Ravi Kumar", phone: "+91 98765 43210", email: "vendor@maxx.com", category: "Groceries", address: "12 Market Rd, Mumbai", gst: "27ABCDE1234F1Z5", active: true },
-    { id: "v2", name: "DailyMoo Dairy", contactPerson: "Priya Shah", phone: "+91 90000 11122", email: "priya@dailymoo.com", category: "Dairy", address: "88 Milk Lane, Pune", gst: "27DAIRY9999K1Z2", active: true },
-    { id: "v3", name: "GoldenCrust Bakery", contactPerson: "Ali Rehman", phone: "+91 91234 56789", email: "ali@goldencrust.com", category: "Bakery", address: "5 Baker St, Delhi", gst: "07BAKER1111L1Z9", active: true },
-    { id: "v4", name: "HomeGlow Household", contactPerson: "Neha Verma", phone: "+91 99887 77665", email: "neha@homeglow.in", category: "Household", address: "23 Green Ave, Bangalore", gst: "29HOMEG2222M1Z8", active: false },
-    { id: "v5", name: "VoltEdge Electronics", contactPerson: "Sameer Roy", phone: "+91 90909 80808", email: "sameer@voltedge.com", category: "Electronics", address: "9 Tech Park, Hyderabad", gst: "36VOLT33333N1Z1", active: true },
+    { id: "v1", name: "FreshFarms Co.", contactPerson: "Ravi Kumar", phone: "9876543210", email: "vendor@vd.com", category: "Groceries", address: "12 Market Rd, Mumbai", gst: "27ABCDE1234F1Z5", status: "Active" },
+    { id: "v2", name: "DailyMoo Dairy", contactPerson: "Priya Shah", phone: "9000011122", email: "priya@dailymoo.com", category: "Dairy", address: "88 Milk Lane, Pune", gst: "27DAIRY9999K1Z2", status: "Active" },
+    { id: "v3", name: "GoldenCrust Bakery", contactPerson: "Ali Rehman", phone: "9123456789", email: "ali@goldencrust.com", category: "Bakery", address: "5 Baker St, Delhi", gst: "07BAKER1111L1Z9", status: "Pending" },
+    { id: "v4", name: "HomeGlow Household", contactPerson: "Neha Verma", phone: "9988777665", email: "neha@homeglow.in", category: "Household", address: "23 Green Ave, Bangalore", gst: "29HOMEG2222M1Z8", status: "Rejected", rejectionReason: "Incomplete documentation" },
+    { id: "v5", name: "VoltEdge Electronics", contactPerson: "Sameer Roy", phone: "9090980808", email: "sameer@voltedge.com", category: "Electronics", address: "9 Tech Park, Hyderabad", gst: "36VOLT33333N1Z1", status: "Active" },
   ];
   const users: User[] = [
     { id: "u1", email: "admin@ad.com", password: "Admin_123", role: "admin" },
@@ -92,13 +94,28 @@ function load(): DB {
   }
 }
 
+export type LoginResult =
+  | { ok: true; user: User }
+  | { ok: false; reason: "invalid" | "pending" | "rejected"; rejectionReason?: string };
+
+export type RegisterInput = {
+  name: string;
+  contactPerson: string;
+  phone: string;
+  email: string;
+  category: string;
+  address: string;
+  gst: string;
+  password: string;
+};
+
 type Ctx = {
   db: DB;
   update: (fn: (db: DB) => DB) => void;
   currentUser: () => User | null;
   currentVendor: () => Vendor | null;
-  login: (email: string, password: string) => User | null;
-  signup: (email: string, password: string, role: Role, vendorId?: string) => User;
+  login: (email: string, password: string) => LoginResult;
+  registerVendor: (input: RegisterInput) => { vendor: Vendor; user: User };
   logout: () => void;
   reset: () => void;
 };
@@ -131,13 +148,31 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     },
     login: (email, password) => {
       const u = db.users.find((x) => x.email.toLowerCase() === email.toLowerCase() && x.password === password);
-      if (u) update((d) => ({ ...d, session: { userId: u.id } }));
-      return u ?? null;
+      if (!u) return { ok: false, reason: "invalid" };
+      if (u.role === "vendor" && u.vendorId) {
+        const v = db.vendors.find((x) => x.id === u.vendorId);
+        if (v?.status === "Pending") return { ok: false, reason: "pending" };
+        if (v?.status === "Rejected") return { ok: false, reason: "rejected", rejectionReason: v.rejectionReason };
+      }
+      update((d) => ({ ...d, session: { userId: u.id } }));
+      return { ok: true, user: u };
     },
-    signup: (email, password, role, vendorId) => {
-      const u: User = { id: `u${Date.now()}`, email, password, role, vendorId };
-      update((d) => ({ ...d, users: [...d.users, u], session: { userId: u.id } }));
-      return u;
+    registerVendor: (input) => {
+      const id = `v${Date.now()}`;
+      const vendor: Vendor = {
+        id,
+        name: input.name,
+        contactPerson: input.contactPerson,
+        phone: input.phone,
+        email: input.email,
+        category: input.category,
+        address: input.address,
+        gst: input.gst,
+        status: "Pending",
+      };
+      const user: User = { id: `u${Date.now()}`, email: input.email, password: input.password, role: "vendor", vendorId: id };
+      update((d) => ({ ...d, vendors: [...d.vendors, vendor], users: [...d.users, user] }));
+      return { vendor, user };
     },
     logout: () => update((d) => ({ ...d, session: { userId: null } })),
     reset: () => setDb(seed()),

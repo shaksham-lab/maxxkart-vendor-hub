@@ -10,7 +10,7 @@ export const Route = createFileRoute("/admin/")({
 
 function Dashboard() {
   const { db } = useStore();
-  const totalVendors = db.vendors.filter((v) => v.active).length;
+  const totalVendors = db.vendors.filter((v) => v.status === "Active").length;
   const activePOs = db.orders.filter((o) => o.status !== "Completed").length;
   const pendingPayments = db.invoices.filter((i) => i.payment === "Pending").reduce((s, i) => s + i.amount, 0);
   const monthSpend = db.orders.reduce((s, o) => s + o.total, 0);
