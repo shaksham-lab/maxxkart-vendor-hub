@@ -155,11 +155,11 @@ function LoginPage() {
             <div className="mt-2 flex gap-2">
               <button onClick={() => quickFill("admin")} className="flex-1 rounded-lg bg-white/70 hover:bg-white px-3 py-2 text-left transition">
                 <span className="block text-xs text-muted-foreground">Admin</span>
-                <span className="block font-medium">admin@maxx.com</span>
+                <span className="block font-medium">admin@ad.com</span>
               </button>
               <button onClick={() => quickFill("vendor")} className="flex-1 rounded-lg bg-white/70 hover:bg-white px-3 py-2 text-left transition">
                 <span className="block text-xs text-muted-foreground">Vendor</span>
-                <span className="block font-medium">vendor@maxx.com</span>
+                <span className="block font-medium">vendor@vd.com</span>
               </button>
             </div>
           </div>
