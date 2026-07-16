@@ -63,8 +63,8 @@ function seed(): DB {
     { id: "v5", name: "VoltEdge Electronics", contactPerson: "Sameer Roy", phone: "+91 90909 80808", email: "sameer@voltedge.com", category: "Electronics", address: "9 Tech Park, Hyderabad", gst: "36VOLT33333N1Z1", active: true },
   ];
   const users: User[] = [
-    { id: "u1", email: "admin@maxx.com", password: "admin123", role: "admin" },
-    { id: "u2", email: "vendor@maxx.com", password: "vendor123", role: "vendor", vendorId: "v1" },
+    { id: "u1", email: "admin@ad.com", password: "Admin_123", role: "admin" },
+    { id: "u2", email: "vendor@vd.com", password: "Vendor_123", role: "vendor", vendorId: "v1" },
   ];
   const orders: PurchaseOrder[] = [
     { id: "PO-1001", vendorId: "v1", items: [{ name: "Basmati Rice 25kg", qty: 20, price: 1800 }, { name: "Toor Dal 10kg", qty: 15, price: 1400 }], total: 20 * 1800 + 15 * 1400, status: "Completed", createdAt: "2026-06-20" },
