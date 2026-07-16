@@ -21,8 +21,8 @@ function LoginPage() {
   const { login, signup, db } = useStore();
   const navigate = useNavigate();
   const [mode, setMode] = useState<"signin" | "signup">("signin");
-  const [email, setEmail] = useState("admin@maxx.com");
-  const [password, setPassword] = useState("admin123");
+  const [email, setEmail] = useState("admin@ad.com");
+  const [password, setPassword] = useState("Admin_123");
   const [role, setRole] = useState<Role>("vendor");
 
   function afterAuth(r: Role) {
@@ -47,8 +47,8 @@ function LoginPage() {
   }
 
   function quickFill(kind: "admin" | "vendor") {
-    if (kind === "admin") { setEmail("admin@maxx.com"); setPassword("admin123"); }
-    else { setEmail("vendor@maxx.com"); setPassword("vendor123"); }
+    if (kind === "admin") { setEmail("admin@ad.com"); setPassword("Admin_123"); }
+    else { setEmail("vendor@vd.com"); setPassword("Vendor_123"); }
     setMode("signin");
   }
 
@@ -155,11 +155,11 @@ function LoginPage() {
             <div className="mt-2 flex gap-2">
               <button onClick={() => quickFill("admin")} className="flex-1 rounded-lg bg-white/70 hover:bg-white px-3 py-2 text-left transition">
                 <span className="block text-xs text-muted-foreground">Admin</span>
-                <span className="block font-medium">admin@maxx.com</span>
+                <span className="block font-medium">admin@ad.com</span>
               </button>
               <button onClick={() => quickFill("vendor")} className="flex-1 rounded-lg bg-white/70 hover:bg-white px-3 py-2 text-left transition">
                 <span className="block text-xs text-muted-foreground">Vendor</span>
-                <span className="block font-medium">vendor@maxx.com</span>
+                <span className="block font-medium">vendor@vd.com</span>
               </button>
             </div>
           </div>
