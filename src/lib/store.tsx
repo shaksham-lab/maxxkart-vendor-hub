@@ -54,7 +54,7 @@ export type DB = {
 
 export const CATEGORIES = ["Groceries", "Dairy", "Bakery", "Household", "Electronics"];
 
-const KEY = "maxxkart_db_v2";
+const KEY = "maxxkart_db_v3";
 
 function seed(): DB {
   const vendors: Vendor[] = [
