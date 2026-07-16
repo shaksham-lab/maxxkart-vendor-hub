@@ -47,8 +47,8 @@ function LoginPage() {
   }
 
   function quickFill(kind: "admin" | "vendor") {
-    if (kind === "admin") { setEmail("admin@maxx.com"); setPassword("admin123"); }
-    else { setEmail("vendor@maxx.com"); setPassword("vendor123"); }
+    if (kind === "admin") { setEmail("admin@ad.com"); setPassword("Admin_123"); }
+    else { setEmail("vendor@vd.com"); setPassword("Vendor_123"); }
     setMode("signin");
   }
 
