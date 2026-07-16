@@ -8,6 +8,7 @@ export type User = {
   role: Role;
   vendorId?: string;
 };
+export type VendorStatus = "Pending" | "Active" | "Rejected";
 export type Vendor = {
   id: string;
   name: string;
@@ -17,7 +18,8 @@ export type Vendor = {
   category: string;
   address: string;
   gst: string;
-  active: boolean;
+  status: VendorStatus;
+  rejectionReason?: string;
 };
 export type POItem = { name: string; qty: number; price: number };
 export type POStatus = "Pending" | "Delivered" | "Completed";
