@@ -21,8 +21,8 @@ function LoginPage() {
   const { login, signup, db } = useStore();
   const navigate = useNavigate();
   const [mode, setMode] = useState<"signin" | "signup">("signin");
-  const [email, setEmail] = useState("admin@maxx.com");
-  const [password, setPassword] = useState("admin123");
+  const [email, setEmail] = useState("admin@ad.com");
+  const [password, setPassword] = useState("Admin_123");
   const [role, setRole] = useState<Role>("vendor");
 
   function afterAuth(r: Role) {
