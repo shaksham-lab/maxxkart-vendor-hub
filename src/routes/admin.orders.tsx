@@ -137,7 +137,7 @@ function Orders() {
               <Label>Vendor</Label>
               <Select value={vendorId} onValueChange={setVendorId}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>{db.vendors.filter((v) => v.active).map((v) => <SelectItem key={v.id} value={v.id}>{v.name} · {v.category}</SelectItem>)}</SelectContent>
+                <SelectContent>{db.vendors.filter((v) => v.status === "Active").map((v) => <SelectItem key={v.id} value={v.id}>{v.name} · {v.category}</SelectItem>)}</SelectContent>
               </Select>
             </div>
             <div>
