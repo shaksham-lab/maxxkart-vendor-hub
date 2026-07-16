@@ -58,11 +58,11 @@ const KEY = "maxxkart_db_v2";
 
 function seed(): DB {
   const vendors: Vendor[] = [
-    { id: "v1", name: "FreshFarms Co.", contactPerson: "Ravi Kumar", phone: "+91 98765 43210", email: "vendor@maxx.com", category: "Groceries", address: "12 Market Rd, Mumbai", gst: "27ABCDE1234F1Z5", active: true },
-    { id: "v2", name: "DailyMoo Dairy", contactPerson: "Priya Shah", phone: "+91 90000 11122", email: "priya@dailymoo.com", category: "Dairy", address: "88 Milk Lane, Pune", gst: "27DAIRY9999K1Z2", active: true },
-    { id: "v3", name: "GoldenCrust Bakery", contactPerson: "Ali Rehman", phone: "+91 91234 56789", email: "ali@goldencrust.com", category: "Bakery", address: "5 Baker St, Delhi", gst: "07BAKER1111L1Z9", active: true },
-    { id: "v4", name: "HomeGlow Household", contactPerson: "Neha Verma", phone: "+91 99887 77665", email: "neha@homeglow.in", category: "Household", address: "23 Green Ave, Bangalore", gst: "29HOMEG2222M1Z8", active: false },
-    { id: "v5", name: "VoltEdge Electronics", contactPerson: "Sameer Roy", phone: "+91 90909 80808", email: "sameer@voltedge.com", category: "Electronics", address: "9 Tech Park, Hyderabad", gst: "36VOLT33333N1Z1", active: true },
+    { id: "v1", name: "FreshFarms Co.", contactPerson: "Ravi Kumar", phone: "9876543210", email: "vendor@vd.com", category: "Groceries", address: "12 Market Rd, Mumbai", gst: "27ABCDE1234F1Z5", status: "Active" },
+    { id: "v2", name: "DailyMoo Dairy", contactPerson: "Priya Shah", phone: "9000011122", email: "priya@dailymoo.com", category: "Dairy", address: "88 Milk Lane, Pune", gst: "27DAIRY9999K1Z2", status: "Active" },
+    { id: "v3", name: "GoldenCrust Bakery", contactPerson: "Ali Rehman", phone: "9123456789", email: "ali@goldencrust.com", category: "Bakery", address: "5 Baker St, Delhi", gst: "07BAKER1111L1Z9", status: "Pending" },
+    { id: "v4", name: "HomeGlow Household", contactPerson: "Neha Verma", phone: "9988777665", email: "neha@homeglow.in", category: "Household", address: "23 Green Ave, Bangalore", gst: "29HOMEG2222M1Z8", status: "Rejected", rejectionReason: "Incomplete documentation" },
+    { id: "v5", name: "VoltEdge Electronics", contactPerson: "Sameer Roy", phone: "9090980808", email: "sameer@voltedge.com", category: "Electronics", address: "9 Tech Park, Hyderabad", gst: "36VOLT33333N1Z1", status: "Active" },
   ];
   const users: User[] = [
     { id: "u1", email: "admin@ad.com", password: "Admin_123", role: "admin" },
