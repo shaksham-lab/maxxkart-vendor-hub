@@ -1,12 +1,12 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useStore, CATEGORIES, type RegisterInput } from "@/lib/store";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { ShoppingBag, Sparkles, ShieldCheck, TrendingUp, CheckCircle2 } from "lucide-react";
+import { ShoppingBag, Sparkles, ShieldCheck, TrendingUp, CheckCircle2, Loader2 } from "lucide-react";
 
 export const Route = createFileRoute("/login")({
   head: () => ({
@@ -26,7 +26,7 @@ const phoneRe = /^[0-9]{10}$/;
 const gstRe = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[0-9A-Z]{1}Z[0-9A-Z]{1}$/;
 const passwordRe = /^(?=.*[0-9]).{8,}$/;
 
-function validate(f: RegisterInput, existingEmails: string[]): Errors {
+function validate(f: RegisterInput): Errors {
   const e: Errors = {};
   if (!f.name.trim()) e.name = "Business name is required";
   else if (!nameRe.test(f.name.trim())) e.name = "Only letters and spaces are allowed";
@@ -34,7 +34,6 @@ function validate(f: RegisterInput, existingEmails: string[]): Errors {
   else if (!nameRe.test(f.contactPerson.trim())) e.contactPerson = "Only letters and spaces are allowed";
   if (!f.email.trim()) e.email = "Email is required";
   else if (!emailRe.test(f.email.trim())) e.email = "Enter a valid email address";
-  else if (existingEmails.includes(f.email.trim().toLowerCase())) e.email = "This email is already registered";
   if (!f.phone.trim()) e.phone = "Phone is required";
   else if (!phoneRe.test(f.phone.trim())) e.phone = "Phone must be exactly 10 digits";
   if (!f.category) e.category = "Please choose a category";
@@ -52,25 +51,25 @@ const emptyForm: RegisterInput = {
 };
 
 function LoginPage() {
-  const { login, registerVendor, db } = useStore();
+  const { signIn, signUp, user, loading } = useStore();
   const navigate = useNavigate();
   const [mode, setMode] = useState<"signin" | "signup">("signin");
+  const [busy, setBusy] = useState(false);
 
-  // sign-in state
   const [email, setEmail] = useState("admin@ad.com");
   const [password, setPassword] = useState("Admin_123");
 
-  // register state
   const [form, setForm] = useState<RegisterInput>(emptyForm);
   const [touched, setTouched] = useState<Partial<Record<keyof RegisterInput, boolean>>>({});
   const [submitted, setSubmitted] = useState(false);
 
-  const existingEmails = useMemo(
-    () => db.users.map((u) => u.email.toLowerCase()).concat(db.vendors.map((v) => v.email.toLowerCase())),
-    [db.users, db.vendors]
-  );
-  const errors = useMemo(() => validate(form, existingEmails), [form, existingEmails]);
+  const errors = useMemo(() => validate(form), [form]);
   const isValid = Object.keys(errors).length === 0;
+
+  useEffect(() => {
+    if (!loading && user?.role === "admin") navigate({ to: "/admin" });
+    else if (!loading && user?.role === "vendor") navigate({ to: "/vendor" });
+  }, [loading, user, navigate]);
 
   function setField<K extends keyof RegisterInput>(k: K, v: RegisterInput[K]) {
     setForm((f) => ({ ...f, [k]: v }));
@@ -78,40 +77,33 @@ function LoginPage() {
   function blur(k: keyof RegisterInput) { setTouched((t) => ({ ...t, [k]: true })); }
   function showErr(k: keyof RegisterInput) { return (touched[k] || submitted) && errors[k]; }
 
-  function onSignIn(e: React.FormEvent) {
+  async function onSignIn(e: React.FormEvent) {
     e.preventDefault();
-    const r = login(email, password);
+    setBusy(true);
+    const r = await signIn(email, password);
+    setBusy(false);
     if (!r.ok) {
       if (r.reason === "invalid") return toast.error("Invalid credentials");
-      if (r.reason === "pending") return toast.error("Your vendor account is awaiting Admin approval");
+      if (r.reason === "pending") return toast.warning("Your vendor account is awaiting Admin approval");
       if (r.reason === "rejected") return toast.error(r.rejectionReason ? `Registration rejected: ${r.rejectionReason}` : "Your vendor registration was rejected");
+      if (r.reason === "unassigned") return toast.error("No role assigned to this account. Contact Admin.");
     } else {
-      toast.success(`Welcome back, ${r.user.role === "admin" ? "Admin" : "Vendor"}`);
-      navigate({ to: r.user.role === "admin" ? "/admin" : "/vendor" });
+      toast.success(`Welcome back, ${r.role === "admin" ? "Admin" : "Vendor"}`);
+      navigate({ to: r.role === "admin" ? "/admin" : "/vendor" });
     }
   }
 
-  function onRegister(e: React.FormEvent) {
+  async function onRegister(e: React.FormEvent) {
     e.preventDefault();
     setSubmitted(true);
     if (!isValid) return;
-    const clean: RegisterInput = {
-      ...form,
-      name: form.name.trim(),
-      contactPerson: form.contactPerson.trim(),
-      email: form.email.trim().toLowerCase(),
-      phone: form.phone.trim(),
-      address: form.address.trim(),
-      gst: form.gst.trim().toUpperCase(),
-    };
-    registerVendor(clean);
-    toast.success("Registration submitted — your account is pending Admin approval.", { duration: 5000 });
-    setForm(emptyForm);
-    setTouched({});
-    setSubmitted(false);
-    setMode("signin");
-    setEmail(clean.email);
-    setPassword("");
+    setBusy(true);
+    const r = await signUp(form);
+    setBusy(false);
+    if (!r.ok) return toast.error(r.message);
+    toast.success("Registration submitted — awaiting Admin approval. Check your email to confirm.", { duration: 6000 });
+    setForm(emptyForm); setTouched({}); setSubmitted(false); setMode("signin");
+    setEmail(form.email.trim().toLowerCase()); setPassword("");
   }
 
   function quickFill(kind: "admin" | "vendor") {
@@ -122,11 +114,9 @@ function LoginPage() {
 
   return (
     <div className="min-h-screen grid lg:grid-cols-2 bg-background">
-      {/* Left: gradient panel */}
       <div className="relative hidden lg:flex flex-col justify-between p-12 text-white bg-gradient-purple overflow-hidden">
         <div className="absolute -top-24 -right-24 h-96 w-96 rounded-full bg-white/10 blur-3xl" />
         <div className="absolute bottom-0 -left-24 h-96 w-96 rounded-full bg-fuchsia-400/20 blur-3xl" />
-
         <div className="relative flex items-center gap-3">
           <div className="h-11 w-11 rounded-2xl bg-white/15 backdrop-blur flex items-center justify-center">
             <ShoppingBag className="h-6 w-6" />
@@ -136,14 +126,13 @@ function LoginPage() {
             <p className="font-semibold">Vendor Management</p>
           </div>
         </div>
-
         <div className="relative space-y-8 max-w-md">
           <h1 className="text-5xl font-bold leading-[1.05]">One clean workspace for every vendor, order, and payment.</h1>
           <p className="text-white/80 text-lg">Register as a vendor, then track your orders, invoices and payments — all in a single, focused view.</p>
           <div className="grid gap-4">
             {[
               { icon: Sparkles, t: "Modern, distraction-free UI" },
-              { icon: ShieldCheck, t: "Role-based access for staff & vendors" },
+              { icon: ShieldCheck, t: "Role-based access with secure backend" },
               { icon: TrendingUp, t: "Spend insights at a glance" },
             ].map(({ icon: Icon, t }) => (
               <div key={t} className="flex items-center gap-3">
@@ -155,11 +144,9 @@ function LoginPage() {
             ))}
           </div>
         </div>
-
         <p className="relative text-xs text-white/60">© {new Date().getFullYear()} Maxxkart Supermarket</p>
       </div>
 
-      {/* Right: form */}
       <div className="flex items-center justify-center p-6 sm:p-12">
         <div className="w-full max-w-md">
           <div className="lg:hidden mb-8 flex items-center gap-3">
@@ -185,12 +172,13 @@ function LoginPage() {
               <Field label="Password">
                 <Input type="password" required value={password} onChange={(e) => setPassword(e.target.value)} className="h-11 rounded-xl" />
               </Field>
-              <Button type="submit" className="w-full h-11 rounded-xl bg-primary hover:bg-primary-deep transition-all hover:shadow-glow text-base font-semibold">
-                Sign in
+              <Button type="submit" disabled={busy} className="w-full h-11 rounded-xl bg-primary hover:bg-primary-deep transition-all hover:shadow-glow text-base font-semibold">
+                {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : "Sign in"}
               </Button>
 
               <div className="rounded-xl border border-dashed bg-accent/40 p-4 text-sm">
-                <p className="font-medium text-accent-foreground">Try a demo account</p>
+                <p className="font-medium text-accent-foreground">Demo credentials</p>
+                <p className="text-xs text-muted-foreground mt-1">First-time setup: register these emails once — <code>admin@ad.com</code> is auto-assigned the Admin role.</p>
                 <div className="mt-2 flex gap-2">
                   <button type="button" onClick={() => quickFill("admin")} className="flex-1 rounded-lg bg-white/70 hover:bg-white px-3 py-2 text-left transition">
                     <span className="block text-xs text-muted-foreground">Admin</span>
@@ -242,8 +230,8 @@ function LoginPage() {
                 <span>Your account will be reviewed by a Maxxkart Admin. You'll be able to sign in once approved.</span>
               </div>
 
-              <Button type="submit" disabled={!isValid} className="w-full h-11 rounded-xl bg-primary hover:bg-primary-deep transition-all hover:shadow-glow text-base font-semibold disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-none">
-                Submit registration
+              <Button type="submit" disabled={!isValid || busy} className="w-full h-11 rounded-xl bg-primary hover:bg-primary-deep transition-all hover:shadow-glow text-base font-semibold disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-none">
+                {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : "Submit registration"}
               </Button>
             </form>
           )}

@@ -1,23 +1,25 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { useStore, CATEGORIES, type VendorStatus } from "@/lib/store";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { StatusBadge } from "@/components/StatusBadge";
-import { Search, ChevronRight } from "lucide-react";
+import { Search, ChevronRight, FileSpreadsheet, FileText } from "lucide-react";
+import { exportExcel, exportPDF } from "@/lib/exports";
 
 export const Route = createFileRoute("/admin/vendors")({
   component: Vendors,
 });
 
 function Vendors() {
-  const { db } = useStore();
+  const { vendors } = useStore();
   const [query, setQuery] = useState("");
   const [cat, setCat] = useState<string>("all");
   const [status, setStatus] = useState<"all" | VendorStatus>("all");
 
-  const filtered = db.vendors.filter((v) => {
+  const filtered = vendors.filter((v) => {
     const q = query.toLowerCase();
     return (
       (!q || v.name.toLowerCase().includes(q) || v.contactPerson.toLowerCase().includes(q) || v.email.toLowerCase().includes(q)) &&
@@ -27,25 +29,44 @@ function Vendors() {
   });
 
   const counts = {
-    all: db.vendors.length,
-    Pending: db.vendors.filter((v) => v.status === "Pending").length,
-    Active: db.vendors.filter((v) => v.status === "Active").length,
-    Rejected: db.vendors.filter((v) => v.status === "Rejected").length,
+    all: vendors.length,
+    Pending: vendors.filter((v) => v.status === "Pending").length,
+    Active: vendors.filter((v) => v.status === "Active").length,
+    Rejected: vendors.filter((v) => v.status === "Rejected").length,
   };
+
+  const exportRows = filtered.map((v) => ({
+    Name: v.name, Category: v.category, Contact: v.contactPerson,
+    Email: v.email, Phone: v.phone, GST: v.gst, Status: v.status, Address: v.address,
+  }));
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold">All Vendors</h1>
-        <p className="text-muted-foreground mt-1">Review registrations and manage your supplier network.</p>
+      <div className="flex items-start justify-between flex-wrap gap-4">
+        <div>
+          <h1 className="text-2xl font-bold">All Vendors</h1>
+          <p className="text-muted-foreground mt-1">Review registrations and manage your supplier network.</p>
+        </div>
+        <div className="flex gap-2">
+          <Button variant="outline" className="rounded-full" onClick={() => exportExcel("vendors", exportRows)}>
+            <FileSpreadsheet className="h-4 w-4 mr-1.5 text-emerald-600" /> Excel
+          </Button>
+          <Button variant="outline" className="rounded-full" onClick={() => exportPDF(
+            "vendors", "Maxxkart Vendors",
+            ["Name", "Category", "Contact", "Email", "Phone", "GST", "Status"],
+            filtered.map((v) => [v.name, v.category, v.contactPerson, v.email, v.phone, v.gst, v.status]),
+          )}>
+            <FileText className="h-4 w-4 mr-1.5 text-red-600" /> PDF
+          </Button>
+        </div>
       </div>
 
       <Tabs value={status} onValueChange={(v) => setStatus(v as typeof status)}>
         <TabsList className="rounded-full bg-accent/60 p-1">
-          <TabsTrigger value="all" className="rounded-full data-[state=active]:bg-white data-[state=active]:shadow-sm">All <span className="ml-1.5 text-xs text-muted-foreground">{counts.all}</span></TabsTrigger>
-          <TabsTrigger value="Pending" className="rounded-full data-[state=active]:bg-white data-[state=active]:shadow-sm">Pending <span className="ml-1.5 text-xs text-amber-600">{counts.Pending}</span></TabsTrigger>
-          <TabsTrigger value="Active" className="rounded-full data-[state=active]:bg-white data-[state=active]:shadow-sm">Active <span className="ml-1.5 text-xs text-emerald-600">{counts.Active}</span></TabsTrigger>
-          <TabsTrigger value="Rejected" className="rounded-full data-[state=active]:bg-white data-[state=active]:shadow-sm">Rejected <span className="ml-1.5 text-xs text-red-600">{counts.Rejected}</span></TabsTrigger>
+          <TabsTrigger value="all" className="rounded-full data-[state=active]:bg-white">All <span className="ml-1.5 text-xs text-muted-foreground">{counts.all}</span></TabsTrigger>
+          <TabsTrigger value="Pending" className="rounded-full data-[state=active]:bg-white">Pending <span className="ml-1.5 text-xs text-amber-600">{counts.Pending}</span></TabsTrigger>
+          <TabsTrigger value="Active" className="rounded-full data-[state=active]:bg-white">Active <span className="ml-1.5 text-xs text-emerald-600">{counts.Active}</span></TabsTrigger>
+          <TabsTrigger value="Rejected" className="rounded-full data-[state=active]:bg-white">Rejected <span className="ml-1.5 text-xs text-red-600">{counts.Rejected}</span></TabsTrigger>
         </TabsList>
       </Tabs>
 

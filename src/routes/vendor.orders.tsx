@@ -10,14 +10,14 @@ export const Route = createFileRoute("/vendor/orders")({
 });
 
 function VendorOrders() {
-  const { db, update, currentVendor } = useStore();
-  const vendor = currentVendor();
+  const { orders, currentVendor, updatePOStatus } = useStore();
+  const vendor = currentVendor;
   if (!vendor) return null;
-  const orders = db.orders.filter((o) => o.vendorId === vendor.id);
+  const myOrders = orders.filter((o) => o.vendorId === vendor.id);
 
-  function markDelivered(o: PurchaseOrder) {
-    update((d) => { d.orders = d.orders.map((x) => x.id === o.id ? { ...x, status: "Delivered" } : x); return d; });
-    toast.success(`${o.id} marked as delivered`);
+  async function markDelivered(o: PurchaseOrder) {
+    try { await updatePOStatus(o.id, "Delivered"); toast.success(`${o.poNumber} marked as delivered`); }
+    catch (e: any) { toast.error(e.message); }
   }
 
   return (
@@ -28,12 +28,12 @@ function VendorOrders() {
       </div>
 
       <div className="grid gap-4">
-        {orders.map((o) => (
+        {myOrders.map((o) => (
           <div key={o.id} className="card-soft p-6">
             <div className="flex items-start justify-between gap-4 flex-wrap">
               <div>
                 <div className="flex items-center gap-3">
-                  <span className="font-mono font-semibold text-lg">{o.id}</span>
+                  <span className="font-mono font-semibold text-lg">{o.poNumber}</span>
                   <StatusBadge status={o.status} />
                 </div>
                 <p className="text-sm text-muted-foreground mt-1">Created {o.createdAt}</p>
@@ -60,7 +60,7 @@ function VendorOrders() {
             )}
           </div>
         ))}
-        {orders.length === 0 && (
+        {myOrders.length === 0 && (
           <div className="card-soft p-16 text-center">
             <div className="mx-auto h-16 w-16 rounded-2xl bg-gradient-purple-soft flex items-center justify-center mb-4">
               <PackageCheck className="h-7 w-7 text-primary-deep" />
