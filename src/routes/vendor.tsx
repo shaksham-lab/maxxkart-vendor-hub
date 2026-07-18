@@ -1,7 +1,7 @@
 import { createFileRoute, Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { useStore } from "@/lib/store";
-import { LayoutDashboard, ClipboardList, Receipt, ShoppingBag, LogOut, User } from "lucide-react";
+import { LayoutDashboard, ClipboardList, Receipt, ShoppingBag, LogOut, User, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/vendor")({
@@ -16,19 +16,21 @@ const nav = [
 ];
 
 function VendorLayout() {
-  const { currentUser, currentVendor, logout } = useStore();
+  const { user, loading, currentVendor, signOut } = useStore();
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const vendor = currentVendor;
 
   useEffect(() => {
-    const u = currentUser();
-    if (!u) navigate({ to: "/login" });
-    else if (u.role !== "vendor") navigate({ to: "/admin" });
-  }, [currentUser, navigate]);
+    if (loading) return;
+    if (!user) navigate({ to: "/login" });
+    else if (user.role !== "vendor") navigate({ to: "/admin" });
+  }, [loading, user, navigate]);
 
-  const user = currentUser();
-  const vendor = currentVendor();
-  if (!user || user.role !== "vendor") return null;
+  if (loading || !user) {
+    return <div className="min-h-screen flex items-center justify-center"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>;
+  }
+  if (user.role !== "vendor") return null;
 
   return (
     <div className="min-h-screen bg-background">
@@ -65,15 +67,14 @@ function VendorLayout() {
             <div className="h-9 w-9 rounded-full bg-gradient-purple text-white flex items-center justify-center text-sm font-semibold">
               {(vendor?.name ?? user.email)[0].toUpperCase()}
             </div>
-            <button onClick={() => { logout(); navigate({ to: "/login" }); }} className="p-2 rounded-full hover:bg-accent" title="Sign out">
+            <button onClick={async () => { await signOut(); navigate({ to: "/login" }); }}
+              className="p-2 rounded-full hover:bg-accent" title="Sign out">
               <LogOut className="h-4 w-4 text-muted-foreground" />
             </button>
           </div>
         </div>
       </header>
-      <main className="max-w-7xl mx-auto px-6 py-8">
-        <Outlet />
-      </main>
+      <main className="max-w-7xl mx-auto px-6 py-8"><Outlet /></main>
     </div>
   );
 }

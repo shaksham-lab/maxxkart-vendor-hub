@@ -7,19 +7,22 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { StatusBadge } from "@/components/StatusBadge";
-import { Plus, Trash2, ChevronDown, ChevronUp, CheckCircle2 } from "lucide-react";
+import { Plus, Trash2, ChevronDown, ChevronUp, CheckCircle2, FileSpreadsheet, FileText } from "lucide-react";
 import { toast } from "sonner";
+import { exportExcel, exportPDF } from "@/lib/exports";
 
 export const Route = createFileRoute("/admin/orders")({
   component: Orders,
 });
 
 function Orders() {
-  const { db, update } = useStore();
+  const { vendors, orders, createPO, updatePOStatus } = useStore();
+  const active = vendors.filter((v) => v.status === "Active");
   const [open, setOpen] = useState(false);
-  const [vendorId, setVendorId] = useState<string>(db.vendors[0]?.id ?? "");
+  const [vendorId, setVendorId] = useState<string>(active[0]?.id ?? "");
   const [items, setItems] = useState<POItem[]>([{ name: "", qty: 1, price: 0 }]);
   const [expanded, setExpanded] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
 
   const total = items.reduce((s, i) => s + i.qty * i.price, 0);
 
@@ -29,31 +32,28 @@ function Orders() {
     setItems(items.map((it, idx) => idx === i ? { ...it, ...patch } : it));
   }
 
-  function save() {
+  async function save() {
     if (!vendorId) return toast.error("Select a vendor");
     if (items.some((i) => !i.name || i.qty <= 0 || i.price <= 0)) return toast.error("Fill all item rows");
-    update((d) => {
-      const nextNum = 1000 + d.orders.length + 1;
-      d.orders.push({
-        id: `PO-${nextNum}`,
-        vendorId,
-        items,
-        total,
-        status: "Pending",
-        createdAt: new Date().toISOString().slice(0, 10),
-      });
-      return d;
-    });
-    toast.success("Purchase order created");
-    setOpen(false);
-    setItems([{ name: "", qty: 1, price: 0 }]);
+    setBusy(true);
+    try {
+      await createPO(vendorId, items);
+      toast.success("Purchase order created");
+      setOpen(false); setItems([{ name: "", qty: 1, price: 0 }]);
+    } catch (e: any) { toast.error(e.message); }
+    finally { setBusy(false); }
   }
 
-  function advance(o: PurchaseOrder) {
+  async function advance(o: PurchaseOrder) {
     const next = o.status === "Pending" ? "Delivered" : "Completed";
-    update((d) => { d.orders = d.orders.map((x) => x.id === o.id ? { ...x, status: next as PurchaseOrder["status"] } : x); return d; });
-    toast.success(`Marked as ${next}`);
+    try { await updatePOStatus(o.id, next); toast.success(`Marked as ${next}`); }
+    catch (e: any) { toast.error(e.message); }
   }
+
+  const exportRows = orders.map((o) => ({
+    PO: o.poNumber, Vendor: vendors.find((v) => v.id === o.vendorId)?.name ?? "",
+    Items: o.items.length, Total: o.total, Status: o.status, Created: o.createdAt,
+  }));
 
   return (
     <div className="space-y-6">
@@ -62,9 +62,21 @@ function Orders() {
           <h1 className="text-2xl font-bold">Purchase Orders</h1>
           <p className="text-muted-foreground mt-1">Create and track POs across vendors.</p>
         </div>
-        <Button onClick={() => setOpen(true)} className="rounded-full bg-primary hover:bg-primary-deep hover:shadow-glow">
-          <Plus className="h-4 w-4 mr-2" /> New PO
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" className="rounded-full" onClick={() => exportExcel("purchase-orders", exportRows)}>
+            <FileSpreadsheet className="h-4 w-4 mr-1.5 text-emerald-600" /> Excel
+          </Button>
+          <Button variant="outline" className="rounded-full" onClick={() => exportPDF(
+            "purchase-orders", "Maxxkart Purchase Orders",
+            ["PO", "Vendor", "Items", "Total", "Status", "Created"],
+            orders.map((o) => [o.poNumber, vendors.find((v) => v.id === o.vendorId)?.name ?? "", o.items.length, formatCurrency(o.total), o.status, o.createdAt]),
+          )}>
+            <FileText className="h-4 w-4 mr-1.5 text-red-600" /> PDF
+          </Button>
+          <Button onClick={() => setOpen(true)} className="rounded-full bg-primary hover:bg-primary-deep hover:shadow-glow">
+            <Plus className="h-4 w-4 mr-2" /> New PO
+          </Button>
+        </div>
       </div>
 
       <div className="card-soft overflow-hidden">
@@ -81,14 +93,13 @@ function Orders() {
             </tr>
           </thead>
           <tbody>
-            {db.orders.map((o, i) => {
-              const v = db.vendors.find((x) => x.id === o.vendorId);
+            {orders.map((o, i) => {
+              const v = vendors.find((x) => x.id === o.vendorId);
               const isExp = expanded === o.id;
               return (
                 <React.Fragment key={o.id}>
                   <tr className={`border-t border-border/60 hover:bg-accent/30 transition ${i % 2 ? "bg-accent/10" : ""}`}>
-
-                    <td className="px-5 py-3.5 font-mono font-medium">{o.id}</td>
+                    <td className="px-5 py-3.5 font-mono font-medium">{o.poNumber}</td>
                     <td className="px-5 py-3.5">{v?.name}</td>
                     <td className="px-5 py-3.5">
                       <button className="inline-flex items-center gap-1 text-primary hover:underline" onClick={() => setExpanded(isExp ? null : o.id)}>
@@ -125,6 +136,9 @@ function Orders() {
                 </React.Fragment>
               );
             })}
+            {orders.length === 0 && (
+              <tr><td colSpan={7} className="px-5 py-16 text-center text-muted-foreground">No purchase orders yet</td></tr>
+            )}
           </tbody>
         </table>
       </div>
@@ -136,8 +150,8 @@ function Orders() {
             <div className="space-y-1.5">
               <Label>Vendor</Label>
               <Select value={vendorId} onValueChange={setVendorId}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>{db.vendors.filter((v) => v.status === "Active").map((v) => <SelectItem key={v.id} value={v.id}>{v.name} · {v.category}</SelectItem>)}</SelectContent>
+                <SelectTrigger><SelectValue placeholder="Select vendor" /></SelectTrigger>
+                <SelectContent>{active.map((v) => <SelectItem key={v.id} value={v.id}>{v.name} · {v.category}</SelectItem>)}</SelectContent>
               </Select>
             </div>
             <div>
@@ -165,7 +179,7 @@ function Orders() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setOpen(false)} className="rounded-full">Cancel</Button>
-            <Button onClick={save} className="rounded-full bg-primary hover:bg-primary-deep">Create PO</Button>
+            <Button onClick={save} disabled={busy} className="rounded-full bg-primary hover:bg-primary-deep">Create PO</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

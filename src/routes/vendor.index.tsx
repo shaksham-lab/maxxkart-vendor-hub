@@ -8,16 +8,20 @@ export const Route = createFileRoute("/vendor/")({
 });
 
 function VendorDashboard() {
-  const { db, currentVendor } = useStore();
-  const vendor = currentVendor();
-  if (!vendor) return null;
+  const { orders, invoices, currentVendor } = useStore();
+  const vendor = currentVendor;
+  if (!vendor) return (
+    <div className="card-soft p-10 text-center">
+      <p className="text-muted-foreground">No vendor profile linked to your account.</p>
+    </div>
+  );
 
-  const orders = db.orders.filter((o) => o.vendorId === vendor.id);
-  const active = orders.filter((o) => o.status !== "Completed").length;
-  const completed = orders.filter((o) => o.status === "Completed").length;
-  const invoices = db.invoices.filter((i) => i.vendorId === vendor.id);
-  const paid = invoices.filter((i) => i.payment === "Paid").reduce((s, i) => s + i.amount, 0);
-  const pending = invoices.filter((i) => i.payment === "Pending").reduce((s, i) => s + i.amount, 0);
+  const myOrders = orders.filter((o) => o.vendorId === vendor.id);
+  const active = myOrders.filter((o) => o.status !== "Completed").length;
+  const completed = myOrders.filter((o) => o.status === "Completed").length;
+  const myInvoices = invoices.filter((i) => i.vendorId === vendor.id);
+  const paid = myInvoices.filter((i) => i.payment === "Paid").reduce((s, i) => s + i.amount, 0);
+  const pending = myInvoices.filter((i) => i.payment === "Pending").reduce((s, i) => s + i.amount, 0);
 
   const stats = [
     { label: "Active Orders", value: active, icon: ClipboardList, tint: "from-violet-500 to-purple-600" },
@@ -71,13 +75,13 @@ function VendorDashboard() {
           <h3 className="font-semibold text-lg mb-1">Recent orders</h3>
           <p className="text-sm text-muted-foreground mb-4">Latest purchase orders assigned to you</p>
           <ul className="divide-y">
-            {orders.slice(0, 5).map((o) => (
+            {myOrders.slice(0, 5).map((o) => (
               <li key={o.id} className="flex items-center gap-3 py-3">
                 <div className="h-9 w-9 rounded-xl bg-accent flex items-center justify-center text-xs font-mono font-semibold text-accent-foreground">
-                  {o.id.split("-")[1]}
+                  {o.poNumber.split("-")[1]}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-medium">{o.id}</p>
+                  <p className="font-medium">{o.poNumber}</p>
                   <p className="text-xs text-muted-foreground">{o.items.length} items · {o.createdAt}</p>
                 </div>
                 <div className="text-right">
@@ -86,9 +90,7 @@ function VendorDashboard() {
                 </div>
               </li>
             ))}
-            {orders.length === 0 && (
-              <li className="py-10 text-center text-muted-foreground text-sm">No orders yet</li>
-            )}
+            {myOrders.length === 0 && <li className="py-10 text-center text-muted-foreground text-sm">No orders yet</li>}
           </ul>
         </div>
       </div>
