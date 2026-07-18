@@ -7,15 +7,15 @@ export const Route = createFileRoute("/")({
 });
 
 function Index() {
-  const { currentUser } = useStore();
+  const { user, loading } = useStore();
   const navigate = useNavigate();
 
   useEffect(() => {
-    const u = currentUser();
-    if (!u) navigate({ to: "/login" });
-    else if (u.role === "admin") navigate({ to: "/admin" });
+    if (loading) return;
+    if (!user) navigate({ to: "/login" });
+    else if (user.role === "admin") navigate({ to: "/admin" });
     else navigate({ to: "/vendor" });
-  }, [currentUser, navigate]);
+  }, [user, loading, navigate]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background">
