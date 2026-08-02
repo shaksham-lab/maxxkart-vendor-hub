@@ -1,8 +1,10 @@
 import { createFileRoute, Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { useStore } from "@/lib/store";
-import { LayoutDashboard, Users, ClipboardList, Receipt, ShoppingBag, LogOut, Search, Loader2 } from "lucide-react";
+import { LayoutDashboard, Users, ClipboardList, Receipt, ShoppingBag, LogOut, Loader2, ShieldCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { GlobalSearch } from "@/components/GlobalSearch";
+import { UserMenu } from "@/components/UserMenu";
 
 export const Route = createFileRoute("/admin")({
   component: AdminLayout,
@@ -13,7 +15,8 @@ const nav = [
   { to: "/admin/vendors", label: "Vendors", icon: Users },
   { to: "/admin/orders", label: "Purchase Orders", icon: ClipboardList },
   { to: "/admin/invoices", label: "Invoices & Payments", icon: Receipt },
-];
+  { to: "/admin/documents", label: "Documents", icon: ShieldCheck },
+] as const;
 
 function AdminLayout() {
   const { user, loading, signOut } = useStore();
@@ -74,17 +77,38 @@ function AdminLayout() {
       </aside>
 
       <div className="flex-1 flex flex-col min-w-0">
-        <header className="h-16 border-b bg-white/70 backdrop-blur flex items-center px-6 gap-4">
-          <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <input placeholder="Search vendors, orders, invoices…"
-              className="w-full h-10 pl-10 pr-4 rounded-full bg-muted/60 focus:bg-white focus:ring-2 focus:ring-primary/30 outline-none text-sm transition" />
+        <header className="sticky top-0 z-40 border-b bg-white/80 backdrop-blur">
+          <div className="h-16 flex items-center px-4 lg:px-6 gap-3">
+            <div className="lg:hidden flex items-center gap-2 shrink-0">
+              <div className="h-9 w-9 rounded-xl bg-gradient-purple text-white flex items-center justify-center">
+                <ShoppingBag className="h-4.5 w-4.5" />
+              </div>
+              <div className="leading-tight hidden sm:block">
+                <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Maxxkart</p>
+                <p className="font-semibold text-sm">Admin</p>
+              </div>
+            </div>
+            <GlobalSearch className="flex-1 max-w-md" />
+            <UserMenu />
           </div>
-          <div className="h-9 w-9 rounded-full bg-gradient-purple text-white flex items-center justify-center text-sm font-semibold">
-            {user.email[0].toUpperCase()}
-          </div>
+
+          {/* Mobile navigation bar */}
+          <nav className="lg:hidden flex items-center gap-1.5 overflow-x-auto px-4 pb-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            {nav.map((item) => {
+              const active = item.exact ? pathname === item.to : pathname.startsWith(item.to);
+              return (
+                <Link key={item.to} to={item.to}
+                  className={cn(
+                    "flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-2 text-xs font-medium transition",
+                    active ? "bg-gradient-purple text-white shadow-glow" : "bg-accent/60 text-muted-foreground hover:text-foreground",
+                  )}>
+                  <item.icon className="h-3.5 w-3.5" /> {item.label}
+                </Link>
+              );
+            })}
+          </nav>
         </header>
-        <main className="flex-1 p-6 lg:p-8 overflow-auto"><Outlet /></main>
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-auto"><Outlet /></main>
       </div>
     </div>
   );
