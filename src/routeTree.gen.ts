@@ -21,6 +21,7 @@ import { Route as VendorInvoicesRouteImport } from './routes/vendor.invoices'
 import { Route as AdminVendorsRouteImport } from './routes/admin.vendors'
 import { Route as AdminOrdersRouteImport } from './routes/admin.orders'
 import { Route as AdminInvoicesRouteImport } from './routes/admin.invoices'
+import { Route as AdminDocumentsRouteImport } from './routes/admin.documents'
 import { Route as ApiPublicSeedAdminRouteImport } from './routes/api.public.seed-admin'
 import { Route as AdminVendorsIdRouteImport } from './routes/admin.vendors.$id'
 
@@ -84,6 +85,11 @@ const AdminInvoicesRoute = AdminInvoicesRouteImport.update({
   path: '/invoices',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminDocumentsRoute = AdminDocumentsRouteImport.update({
+  id: '/documents',
+  path: '/documents',
+  getParentRoute: () => AdminRoute,
+} as any)
 const ApiPublicSeedAdminRoute = ApiPublicSeedAdminRouteImport.update({
   id: '/api/public/seed-admin',
   path: '/api/public/seed-admin',
@@ -100,6 +106,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRouteWithChildren
   '/login': typeof LoginRoute
   '/vendor': typeof VendorRouteWithChildren
+  '/admin/documents': typeof AdminDocumentsRoute
   '/admin/invoices': typeof AdminInvoicesRoute
   '/admin/orders': typeof AdminOrdersRoute
   '/admin/vendors': typeof AdminVendorsRouteWithChildren
@@ -114,6 +121,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/admin/documents': typeof AdminDocumentsRoute
   '/admin/invoices': typeof AdminInvoicesRoute
   '/admin/orders': typeof AdminOrdersRoute
   '/admin/vendors': typeof AdminVendorsRouteWithChildren
@@ -131,6 +139,7 @@ export interface FileRoutesById {
   '/admin': typeof AdminRouteWithChildren
   '/login': typeof LoginRoute
   '/vendor': typeof VendorRouteWithChildren
+  '/admin/documents': typeof AdminDocumentsRoute
   '/admin/invoices': typeof AdminInvoicesRoute
   '/admin/orders': typeof AdminOrdersRoute
   '/admin/vendors': typeof AdminVendorsRouteWithChildren
@@ -149,6 +158,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/login'
     | '/vendor'
+    | '/admin/documents'
     | '/admin/invoices'
     | '/admin/orders'
     | '/admin/vendors'
@@ -163,6 +173,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/login'
+    | '/admin/documents'
     | '/admin/invoices'
     | '/admin/orders'
     | '/admin/vendors'
@@ -179,6 +190,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/login'
     | '/vendor'
+    | '/admin/documents'
     | '/admin/invoices'
     | '/admin/orders'
     | '/admin/vendors'
@@ -285,6 +297,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminInvoicesRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/documents': {
+      id: '/admin/documents'
+      path: '/documents'
+      fullPath: '/admin/documents'
+      preLoaderRoute: typeof AdminDocumentsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/api/public/seed-admin': {
       id: '/api/public/seed-admin'
       path: '/api/public/seed-admin'
@@ -315,6 +334,7 @@ const AdminVendorsRouteWithChildren = AdminVendorsRoute._addFileChildren(
 )
 
 interface AdminRouteChildren {
+  AdminDocumentsRoute: typeof AdminDocumentsRoute
   AdminInvoicesRoute: typeof AdminInvoicesRoute
   AdminOrdersRoute: typeof AdminOrdersRoute
   AdminVendorsRoute: typeof AdminVendorsRouteWithChildren
@@ -322,6 +342,7 @@ interface AdminRouteChildren {
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  AdminDocumentsRoute: AdminDocumentsRoute,
   AdminInvoicesRoute: AdminInvoicesRoute,
   AdminOrdersRoute: AdminOrdersRoute,
   AdminVendorsRoute: AdminVendorsRouteWithChildren,
