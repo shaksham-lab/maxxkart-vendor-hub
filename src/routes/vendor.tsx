@@ -17,7 +17,7 @@ const nav = [
 ];
 
 function VendorLayout() {
-  const { user, loading, currentVendor, signOut } = useStore();
+  const { user, loading, currentVendor } = useStore();
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const vendor = currentVendor;
@@ -32,7 +32,6 @@ function VendorLayout() {
     return <div className="min-h-screen flex items-center justify-center"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>;
   }
   if (user.role !== "vendor") return null;
-  void signOut;
 
   return (
     <div className="min-h-screen bg-background">
