@@ -12,11 +12,11 @@ export const Route = createFileRoute("/admin")({
 
 const nav = [
   { to: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
-  { to: "/admin/vendors", label: "Vendors", icon: Users },
-  { to: "/admin/orders", label: "Purchase Orders", icon: ClipboardList },
-  { to: "/admin/invoices", label: "Invoices & Payments", icon: Receipt },
-  { to: "/admin/documents", label: "Documents", icon: ShieldCheck },
-] as const;
+  { to: "/admin/vendors", label: "Vendors", icon: Users, exact: false },
+  { to: "/admin/orders", label: "Purchase Orders", icon: ClipboardList, exact: false },
+  { to: "/admin/invoices", label: "Invoices & Payments", icon: Receipt, exact: false },
+  { to: "/admin/documents", label: "Documents", icon: ShieldCheck, exact: false },
+];
 
 function AdminLayout() {
   const { user, loading, signOut } = useStore();
