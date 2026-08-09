@@ -1,0 +1,144 @@
+/* ============================================================
+   Maxxkart design system — Purple & White
+   Colours: #7C3AED (primary) · #4C1D95 (dark) · #EDE9FE (light)
+   ============================================================ */
+
+:root {
+  --purple: #7C3AED;
+  --purple-dark: #4C1D95;
+  --purple-light: #EDE9FE;
+  --text: #1F2937;
+  --muted: #6B7280;
+  --border: #E5E7EB;
+  --bg: #F9FAFB;
+  --radius: 16px;
+  --shadow: 0 4px 20px rgba(76, 29, 149, 0.08);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Poppins', 'Inter', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 15px;
+}
+
+/* ---------- Login page: split screen ---------- */
+.split { display: flex; min-height: 100vh; }
+.split .left {
+  flex: 1;
+  background: linear-gradient(135deg, var(--purple) 0%, var(--purple-dark) 100%);
+  color: #fff;
+  padding: 64px 56px;
+  display: flex; flex-direction: column; justify-content: center;
+}
+.split .left h1 { font-size: 42px; margin-bottom: 16px; }
+.split .left p { opacity: .85; line-height: 1.7; max-width: 380px; }
+.split .right {
+  flex: 1;
+  display: flex; align-items: center; justify-content: center;
+  padding: 40px; background: #fff;
+}
+.form-box { width: 100%; max-width: 420px; }
+.form-box h2 { margin-bottom: 6px; }
+.form-box .hint { color: var(--muted); margin-bottom: 24px; font-size: 14px; }
+
+/* ---------- Form controls ---------- */
+label { display: block; font-weight: 500; font-size: 13px; margin: 14px 0 6px; }
+input, select, textarea {
+  width: 100%; padding: 11px 14px;
+  border: 1px solid var(--border); border-radius: 12px;
+  font: inherit; background: #fff; outline: none;
+}
+input:focus, select:focus, textarea:focus { border-color: var(--purple); box-shadow: 0 0 0 3px var(--purple-light); }
+.error { color: #DC2626; font-size: 12px; margin-top: 4px; }
+
+button {
+  font: inherit; cursor: pointer; border: none;
+  border-radius: 12px; padding: 11px 18px;
+  background: var(--purple); color: #fff; font-weight: 500;
+  transition: opacity .15s;
+}
+button:hover { opacity: .9; }
+button.ghost { background: var(--purple-light); color: var(--purple-dark); }
+button.outline { background: #fff; color: var(--text); border: 1px solid var(--border); }
+button.danger { background: #DC2626; }
+button.small { padding: 6px 12px; font-size: 13px; border-radius: 9px; }
+.full { width: 100%; margin-top: 20px; }
+.link { color: var(--purple); cursor: pointer; text-decoration: underline; background: none; border: none; font: inherit; padding: 0; }
+
+/* ---------- App shell (admin / vendor pages) ---------- */
+.topbar {
+  background: #fff; border-bottom: 1px solid var(--border);
+  padding: 0 24px; display: flex; align-items: center; gap: 24px; height: 64px;
+  position: sticky; top: 0; z-index: 10;
+}
+.brand { font-weight: 700; color: var(--purple-dark); font-size: 18px; }
+.nav { display: flex; gap: 4px; flex: 1; overflow-x: auto; }
+.nav button {
+  background: none; color: var(--muted); border-radius: 999px; padding: 8px 16px; font-size: 14px;
+}
+.nav button.active { background: var(--purple-light); color: var(--purple-dark); font-weight: 600; }
+
+/* profile chip in the top-right corner */
+.profile { position: relative; }
+.avatar {
+  width: 38px; height: 38px; border-radius: 50%;
+  background: var(--purple); color: #fff; display: grid; place-items: center; font-weight: 600;
+}
+.dropdown {
+  position: absolute; right: 0; top: 48px; width: 240px; background: #fff;
+  border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow);
+  padding: 16px; display: none;
+}
+.dropdown.open { display: block; }
+.dropdown .who { font-weight: 600; word-break: break-all; }
+.dropdown .role { color: var(--muted); font-size: 13px; margin: 2px 0 14px; text-transform: capitalize; }
+
+main { padding: 28px; max-width: 1200px; margin: 0 auto; }
+h2.page-title { margin-bottom: 18px; font-size: 22px; }
+
+/* ---------- Cards / grids / tables ---------- */
+.card {
+  background: #fff; border: 1px solid var(--border);
+  border-radius: var(--radius); box-shadow: var(--shadow); padding: 20px; margin-bottom: 20px;
+}
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 20px; }
+.stat .label { color: var(--muted); font-size: 13px; }
+.stat .value { font-size: 26px; font-weight: 700; color: var(--purple-dark); margin-top: 6px; }
+
+table { width: 100%; border-collapse: collapse; }
+th, td { text-align: left; padding: 11px 10px; border-bottom: 1px solid var(--border); font-size: 14px; }
+th { color: var(--muted); font-weight: 500; font-size: 12px; text-transform: uppercase; letter-spacing: .4px; }
+tbody tr:hover { background: #FAFAFF; }
+
+/* ---------- Status badges ---------- */
+.badge { padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 500; display: inline-block; }
+.badge.green  { background: #DCFCE7; color: #166534; }
+.badge.amber  { background: #FEF3C7; color: #92400E; }
+.badge.red    { background: #FEE2E2; color: #991B1B; }
+.badge.purple { background: var(--purple-light); color: var(--purple-dark); }
+
+/* ---------- Bar chart drawn with plain CSS ---------- */
+.bars { display: flex; align-items: flex-end; gap: 18px; height: 190px; padding-top: 10px; }
+.bar-col { flex: 1; text-align: center; display: flex; flex-direction: column; justify-content: flex-end; height: 100%; }
+.bar { background: linear-gradient(180deg, var(--purple) 0%, var(--purple-dark) 100%); border-radius: 8px 8px 0 0; min-height: 4px; }
+.bar-label { font-size: 12px; color: var(--muted); margin-top: 8px; }
+.bar-value { font-size: 12px; font-weight: 600; margin-bottom: 6px; }
+
+.row { display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap; }
+.row > * { flex: 1; min-width: 140px; }
+.tabs { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
+.muted { color: var(--muted); }
+.hidden { display: none !important; }
+.toast {
+  position: fixed; bottom: 24px; right: 24px; background: var(--purple-dark); color: #fff;
+  padding: 12px 18px; border-radius: 12px; box-shadow: var(--shadow); z-index: 50;
+}
+
+@media (max-width: 800px) {
+  .split { flex-direction: column; }
+  .split .left { padding: 40px 28px; }
+  main { padding: 16px; }
+}
