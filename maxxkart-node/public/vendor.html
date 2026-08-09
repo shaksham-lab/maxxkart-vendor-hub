@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vendor Portal — Maxxkart Vendor Management</title>
+  <meta name="description" content="Maxxkart vendor portal: view purchase orders, mark deliveries, upload invoices and submit verification documents." />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">Maxxkart</div>
+    <nav class="nav">
+      <button data-page="orders">My Orders</button>
+      <button data-page="invoices">My Invoices</button>
+      <button data-page="profile">My Profile</button>
+    </nav>
+    <div class="profile">
+      <div class="avatar" id="avatar">V</div>
+      <div class="dropdown" id="dropdown">
+        <div class="who" id="who"></div>
+        <div class="role" id="role"></div>
+        <button class="outline small" id="logout">Sign out</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- ---------- ORDERS ---------- -->
+    <section data-page="orders">
+      <h2 class="page-title">My purchase orders</h2>
+      <div class="card"><table>
+        <thead><tr><th>PO No.</th><th>Items</th><th>Total</th><th>Status</th><th>Date</th><th></th></tr></thead>
+        <tbody id="orderRows"></tbody>
+      </table></div>
+    </section>
+
+    <!-- ---------- INVOICES ---------- -->
+    <section data-page="invoices" class="hidden">
+      <h2 class="page-title">My invoices</h2>
+      <div class="card">
+        <h3>Upload an invoice</h3>
+        <div class="row" style="margin-top:12px">
+          <div><label>Delivered order</label><select id="invPO"></select></div>
+          <div><label>Invoice file (PDF or image)</label><input id="invFile" type="file" accept=".pdf,image/*" /></div>
+          <div style="flex:0"><button id="uploadInvoice">Upload</button></div>
+        </div>
+      </div>
+      <div class="card"><table>
+        <thead><tr><th>Invoice</th><th>PO</th><th>Amount</th><th>Status</th><th>Payment</th><th>File</th></tr></thead>
+        <tbody id="invoiceRows"></tbody>
+      </table></div>
+    </section>
+
+    <!-- ---------- PROFILE + DOCUMENTS ---------- -->
+    <section data-page="profile" class="hidden">
+      <h2 class="page-title">My profile</h2>
+      <div class="card">
+        <div class="row">
+          <div><label>Company name</label><input id="p_name" /></div>
+          <div><label>Contact person</label><input id="p_contactPerson" /></div>
+        </div>
+        <div class="row">
+          <div><label>Phone</label><input id="p_phone" maxlength="10" /></div>
+          <div><label>Email</label><input id="p_email" /></div>
+        </div>
+        <div class="row">
+          <!-- Category and GST cannot be changed by the vendor -->
+          <div><label>Category (locked)</label><input id="p_category" disabled /></div>
+          <div><label>GST number (locked)</label><input id="p_gst" disabled /></div>
+        </div>
+        <label>Address</label><input id="p_address" />
+        <button class="full" id="saveProfile">Save changes</button>
+      </div>
+
+      <div class="card">
+        <h3>Verification documents</h3>
+        <div class="row" style="margin-top:12px">
+          <div><label>Document type</label>
+            <select id="docType"><option>GST</option><option>PAN</option><option>Registration</option><option>Other</option></select>
+          </div>
+          <div><label>File</label><input id="docFile" type="file" accept=".pdf,image/*" /></div>
+          <div style="flex:0"><button id="uploadDoc">Upload</button></div>
+        </div>
+        <table style="margin-top:14px">
+          <thead><tr><th>Type</th><th>File</th><th>Status</th><th>Uploaded</th></tr></thead>
+          <tbody id="docRows"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <script src="/js/common.js"></script>
+  <script src="/js/vendor.js"></script>
+</body>
+</html>

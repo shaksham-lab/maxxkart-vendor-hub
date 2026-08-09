@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Portal — Maxxkart Vendor Management</title>
+  <meta name="description" content="Maxxkart admin portal: dashboard analytics, vendor approvals, purchase orders, invoices and document verification." />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <!-- Navigation bar (same on every admin page section) -->
+  <header class="topbar">
+    <div class="brand">Maxxkart</div>
+    <nav class="nav">
+      <button data-page="dashboard">Dashboard</button>
+      <button data-page="vendors">Vendors</button>
+      <button data-page="orders">Purchase Orders</button>
+      <button data-page="invoices">Invoices</button>
+      <button data-page="documents">Documents</button>
+    </nav>
+    <div class="profile">
+      <div class="avatar" id="avatar">A</div>
+      <div class="dropdown" id="dropdown">
+        <div class="who" id="who"></div>
+        <div class="role" id="role"></div>
+        <button class="outline small" id="logout">Sign out</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- ---------- DASHBOARD ---------- -->
+    <section data-page="dashboard">
+      <h2 class="page-title">Dashboard</h2>
+      <div class="grid" id="stats"></div>
+      <div class="card">
+        <h3>Spend by category</h3>
+        <div class="bars" id="categoryChart"></div>
+      </div>
+      <div class="card">
+        <h3>Orders by status</h3>
+        <div class="bars" id="statusChart"></div>
+      </div>
+    </section>
+
+    <!-- ---------- VENDORS ---------- -->
+    <section data-page="vendors" class="hidden">
+      <h2 class="page-title">Vendors</h2>
+      <div class="tabs" id="vendorTabs">
+        <button class="ghost small" data-tab="All">All</button>
+        <button class="outline small" data-tab="Pending">Pending</button>
+        <button class="outline small" data-tab="Active">Active</button>
+        <button class="outline small" data-tab="Rejected">Rejected</button>
+      </div>
+      <div class="card"><table>
+        <thead><tr><th>Company</th><th>Contact</th><th>Category</th><th>GST</th><th>Status</th><th></th></tr></thead>
+        <tbody id="vendorRows"></tbody>
+      </table></div>
+    </section>
+
+    <!-- ---------- PURCHASE ORDERS ---------- -->
+    <section data-page="orders" class="hidden">
+      <h2 class="page-title">Purchase Orders</h2>
+      <div class="card">
+        <h3>Create a new order</h3>
+        <div class="row" style="margin-top:12px">
+          <div><label>Vendor</label><select id="poVendor"></select></div>
+          <div><label>Item</label><input id="poItem" placeholder="Basmati Rice 25kg" /></div>
+          <div><label>Quantity</label><input id="poQty" type="number" value="1" /></div>
+          <div><label>Price (₹)</label><input id="poPrice" type="number" value="0" /></div>
+          <div style="flex:0"><button id="addItem">Add item</button></div>
+        </div>
+        <table style="margin-top:14px"><tbody id="draftItems"></tbody></table>
+        <button class="full" id="createPO">Create purchase order</button>
+      </div>
+      <div class="card"><table>
+        <thead><tr><th>PO No.</th><th>Vendor</th><th>Items</th><th>Total</th><th>Status</th><th>Date</th></tr></thead>
+        <tbody id="orderRows"></tbody>
+      </table></div>
+    </section>
+
+    <!-- ---------- INVOICES ---------- -->
+    <section data-page="invoices" class="hidden">
+      <h2 class="page-title">Invoices &amp; Payments</h2>
+      <div class="card"><table>
+        <thead><tr><th>Invoice</th><th>Vendor</th><th>PO</th><th>Amount</th><th>Status</th><th>Payment</th><th>File</th><th>Actions</th></tr></thead>
+        <tbody id="invoiceRows"></tbody>
+      </table></div>
+    </section>
+
+    <!-- ---------- DOCUMENTS ---------- -->
+    <section data-page="documents" class="hidden">
+      <h2 class="page-title">Document verification</h2>
+      <div class="card"><table>
+        <thead><tr><th>Vendor</th><th>Type</th><th>File</th><th>Status</th><th>Actions</th></tr></thead>
+        <tbody id="documentRows"></tbody>
+      </table></div>
+    </section>
+  </main>
+
+  <script src="/js/common.js"></script>
+  <script src="/js/admin.js"></script>
+</body>
+</html>
