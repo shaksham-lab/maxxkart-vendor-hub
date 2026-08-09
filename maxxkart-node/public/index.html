@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Maxxkart — Vendor Management System Login</title>
+  <meta name="description" content="Sign in to the Maxxkart Vendor Management System to manage vendors, purchase orders and invoices." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <div class="split">
+    <!-- Left purple gradient panel -->
+    <div class="left">
+      <h1>Maxxkart</h1>
+      <p>Vendor Management System — approve vendors, raise purchase orders and settle invoices, all in one clean place.</p>
+    </div>
+
+    <!-- Right side: login form and (hidden) registration form -->
+    <div class="right">
+      <!-- LOGIN -->
+      <div class="form-box" id="loginBox">
+        <h2>Welcome back</h2>
+        <p class="hint">Sign in to continue</p>
+
+        <label for="email">Email</label>
+        <input id="email" type="email" placeholder="you@company.com" />
+
+        <label for="password">Password</label>
+        <input id="password" type="password" placeholder="••••••••" />
+
+        <p class="error" id="loginError"></p>
+        <button class="full" id="loginBtn">Sign in</button>
+
+        <p class="hint" style="margin-top:18px">
+          New vendor? <button class="link" id="showRegister">Register here</button>
+        </p>
+        <p class="hint">Demo admin: hellt5409@gmail.com / Admin_123</p>
+      </div>
+
+      <!-- REGISTRATION (vendors only) -->
+      <div class="form-box hidden" id="registerBox">
+        <h2>Vendor registration</h2>
+        <p class="hint">Your account is reviewed by an admin before you can sign in.</p>
+
+        <label>Company name</label><input id="r_name" /><p class="error" data-err="name"></p>
+        <label>Contact person</label><input id="r_contactPerson" /><p class="error" data-err="contactPerson"></p>
+        <label>Phone (10 digits)</label><input id="r_phone" maxlength="10" /><p class="error" data-err="phone"></p>
+        <label>Email</label><input id="r_email" type="email" /><p class="error" data-err="email"></p>
+        <label>Category</label>
+        <select id="r_category">
+          <option value="">Select…</option>
+          <option>Groceries</option><option>Dairy</option><option>Bakery</option>
+          <option>Household</option><option>Electronics</option>
+        </select><p class="error" data-err="category"></p>
+        <label>Address</label><input id="r_address" /><p class="error" data-err="address"></p>
+        <label>GST number (15 characters)</label><input id="r_gst" maxlength="15" style="text-transform:uppercase" /><p class="error" data-err="gst"></p>
+        <label>Password</label><input id="r_password" type="password" /><p class="error" data-err="password"></p>
+
+        <button class="full" id="registerBtn">Create account</button>
+        <p class="hint" style="margin-top:14px">
+          Already registered? <button class="link" id="showLogin">Back to sign in</button>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/common.js"></script>
+  <script src="/js/login.js"></script>
+</body>
+</html>
