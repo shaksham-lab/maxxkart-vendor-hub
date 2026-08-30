@@ -237,29 +237,30 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const signUp: Ctx["signUp"] = async (input) => {
     const email = input.email.trim().toLowerCase();
     const redirectUrl = `${window.location.origin}/login`;
+    // The vendor record is created automatically by the backend from this
+    // metadata, so registration works even before the email is confirmed.
     const { data, error } = await supabase.auth.signUp({
       email,
       password: input.password,
-      options: { emailRedirectTo: redirectUrl, data: { full_name: input.contactPerson } },
+      options: {
+        emailRedirectTo: redirectUrl,
+        data: {
+          full_name: input.contactPerson.trim(),
+          vendor_name: input.name.trim(),
+          contact_person: input.contactPerson.trim(),
+          phone: input.phone.trim(),
+          category: input.category,
+          address: input.address.trim(),
+          gst: input.gst.trim().toUpperCase(),
+        },
+      },
     });
     if (error) return { ok: false, message: error.message };
     if (!data.user) return { ok: false, message: "Signup failed" };
-    // Vendor row must be created while a session exists.
-    const { error: vErr } = await supabase.from("vendors").insert({
-      owner_user_id: data.user.id,
-      name: input.name.trim(),
-      contact_person: input.contactPerson.trim(),
-      phone: input.phone.trim(),
-      email,
-      category: input.category,
-      address: input.address.trim(),
-      gst: input.gst.trim().toUpperCase(),
-      status: "Pending",
-    });
-    if (vErr) return { ok: false, message: vErr.message };
-    await supabase.auth.signOut();
+    if (data.session) await supabase.auth.signOut();
     return { ok: true };
   };
+
 
   const signOut = async () => { await supabase.auth.signOut(); };
 
